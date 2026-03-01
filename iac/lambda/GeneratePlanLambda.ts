@@ -6,7 +6,6 @@ import { Duration } from 'aws-cdk-lib';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpMethod, HttpRoute, HttpRouteKey } from 'aws-cdk-lib/aws-apigatewayv2';
 import GeneratePlanLambdaProps from './GeneratePlanLambdaProps';
-import Environment from '../core/Environment';
 
 export default class GeneratePlanLambda extends BaseLambdaFunction {
   constructor(scope: Construct, id: string, props: GeneratePlanLambdaProps) {
@@ -20,7 +19,6 @@ export default class GeneratePlanLambda extends BaseLambdaFunction {
       timeout: Duration.seconds(30),
       environment: {
         POWERTOOLS_SERVICE_NAME: `${id}`,
-        OPENAI_API_KEY: Environment.current.OPENAI_API_KEY,
       },
     });
 

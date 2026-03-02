@@ -10,9 +10,10 @@
     "build:local": "ts-node esbuild.ts --watch",
     "test": "jest",
     "cdk": "cdk",
+    "secret:create:openai": "tsx scripts/create-openai-secret.ts",
     "prepare": "husky",
     "localstack": "docker ps -aq --filter name=localstack_plant-water-planner-core | xargs docker stop && docker ps -aq --filter name=localstack_plant-water-planner-core | xargs docker rm && docker-compose up",
-    "deploy:local": "rm -rf cdk.out/ && yarn bootstrap:local && yarn cdklocal deploy --verbose --require-approval never",
+    "deploy:local": "rm -rf cdk.out/ && yarn bootstrap:local && yarn secret:create:openai && yarn cdklocal deploy --verbose --require-approval never",
     "bootstrap:local": "cdklocal bootstrap --verbose"
   },
   "devDependencies": {
@@ -59,6 +60,7 @@
     "@aws-lambda-powertools/metrics": "^2.27.0",
     "@aws-lambda-powertools/tracer": "^2.27.0",
     "@aws-sdk/client-s3": "^3.1000.0",
+    "@aws-sdk/client-secrets-manager": "^3.1000.0",
     "@aws-sdk/s3-request-presigner": "^3.1000.0",
     "@hapi/joi": "^17.1.1",
     "@middy/core": "^7.1.2",

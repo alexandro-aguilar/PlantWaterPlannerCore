@@ -7,6 +7,7 @@ import Environment from './core/Environment';
 dotenv.config();
 
 const app = new cdk.App();
+cdk.Tags.of(app).add('projectName', 'PlantWaterPlannerCore');
 Environment.getInstance(); // Initialize environment variables
 new PlantWaterPlannerCoreStack(app, 'PlantWaterPlannerCoreStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.

@@ -1,6 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import GeneratePlanLambda from './lambda/GeneratePlanLambda';
 import CoreApiGateway from './apiGateway/CoreApiGateway';
 import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import IdentifyPlantLambda from './lambda/IdentifyPlantLambda';
@@ -35,12 +34,7 @@ export class PlantWaterPlannerCoreStack extends cdk.Stack {
       managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')],
     });
 
-    const generatePlanLambda = new GeneratePlanLambda(this, `GeneratePlanLambda-${Environment.current.STAGE}`, {
-      role,
-      api,
-    });
-
-    new IdentifyPlantLambda(this, `IdentifyPlantLambda-${Environment.current.STAGE}`, {
+    const identifyPlantLambda = new IdentifyPlantLambda(this, `IdentifyPlantLambda-${Environment.current.STAGE}`, {
       role,
       api,
       bucket,
@@ -52,7 +46,7 @@ export class PlantWaterPlannerCoreStack extends cdk.Stack {
       api,
     });
 
-    openAiSecret.grantRead(generatePlanLambda);
+    openAiSecret.grantRead(identifyPlantLambda);
 
     new cdk.CfnOutput(this, `ApiGatewayUrl-${Environment.current.STAGE}`, {
       value: api.apiEndpoint ?? 'unknown-endpoint',

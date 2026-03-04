@@ -3,17 +3,24 @@ import ILogger from '../../../core/utils/ILogger';
 import { types } from '../config/types';
 import PlantImageAnalizeOpenAi from '../infrastructure/services/PlantImageAnalizeOpenAi';
 import S3Service from '../infrastructure/services/S3Service';
+import Environment from '../../../core/utils/Environment';
+import SecretsManagerService from '../infrastructure/services/SecretsManagerService';
 
 @injectable()
 export default class IdentifyPlanUseCase {
   constructor(
     @inject(types.Logger) private logger: ILogger,
     @inject(types.PlantImageAnalizeOpenAi) private plantImageAnalizeOpenAi: PlantImageAnalizeOpenAi,
-    @inject(types.S3Service) private s3Service: S3Service
+    @inject(types.S3Service) private s3Service: S3Service,
+    @inject(types.SecretsManagerService) private secretsManagerService: SecretsManagerService
   ) {}
 
   async execute(plantUrl: string): Promise<string> {
     try {
+      if (!Environment.OPENAI_API_KEY) {
+        const secret = await this.secretsManagerService.getSecretValueByArn(Environment.OPENAI_SECRET_ARN);
+        Environment.OPENAI_API_KEY = JSON.parse(secret).value;
+      }
       const imageBase64 = await this.s3Service.downloadFileAsBase64(plantUrl);
 
       const identificationResult = await this.plantImageAnalizeOpenAi.identifyPlants(imageBase64);

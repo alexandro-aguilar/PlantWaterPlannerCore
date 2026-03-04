@@ -8,9 +8,7 @@ import { types } from '../../config/types';
 export default class OpenAiVisionService {
   private openAiClient: OpenAI;
 
-  constructor(@inject(types.Logger) private logger: ILogger) {
-    this.openAiClient = new OpenAI({ apiKey: Environment.OPENAI_API_KEY || '' });
-  }
+  constructor(@inject(types.Logger) private logger: ILogger) {}
 
   private async analyzeImage(imageBase64: string, prompt: string): Promise<string> {
     try {
@@ -44,6 +42,9 @@ export default class OpenAiVisionService {
   }
 
   async identifyPlants(imageBase64: string): Promise<string> {
+    this.openAiClient = new OpenAI({
+      apiKey: Environment.OPENAI_API_KEY,
+    });
     try {
       this.logger.info('imageBase64 Analize', { length: imageBase64.length });
       const prompt = `Analyze this image and identify just a plant. 

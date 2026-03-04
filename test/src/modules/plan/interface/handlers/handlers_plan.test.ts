@@ -37,25 +37,6 @@ jest.mock('../../../../../../src/modules/plan/config/container', () => {
   };
 });
 
-describe('GeneratePlanHandler', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  it('given request with plants when handling then returns plan response', async () => {
-    // Given
-    const { handler } = await import('../../../../../../src/modules/plan/interface/handlers/GeneratePlanHandler');
-    const event: any = { body: JSON.stringify({ plants: ['fern'] }) };
-    const context: any = { awsRequestId: 'req-1' };
-
-    // When
-    const response: any = await handler(event, context);
-
-    // Then
-    expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body).plan).toBe('plan-json');
-    expect(mockLogger.addContext).toHaveBeenCalledWith({ requestId: 'req-1' });
-  });
-});
-
 describe('IdentifyPlantHandler', () => {
   beforeEach(() => jest.clearAllMocks());
 

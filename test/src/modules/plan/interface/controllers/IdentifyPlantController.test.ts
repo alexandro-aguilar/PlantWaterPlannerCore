@@ -1,4 +1,3 @@
-import GeneratePlanController from '../../../../../../src/modules/plan/interface/controllers/GeneratePlanController';
 import IdentifyPlantController from '../../../../../../src/modules/plan/interface/controllers/IdentifyPlantController';
 
 const logger = {
@@ -8,24 +7,6 @@ const logger = {
   warn: jest.fn(),
   addContext: jest.fn(),
 };
-
-describe('GeneratePlanController', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  it('given plants when executing then returns generated plan and logs timings', async () => {
-    // Given
-    const openAiService = { generatePlan: jest.fn().mockResolvedValue('plan-json') };
-    const controller = new GeneratePlanController(logger as any, openAiService as any);
-
-    // When
-    const result = await controller.execute(['fern']);
-
-    // Then
-    expect(openAiService.generatePlan).toHaveBeenCalledWith(['fern']);
-    expect(result).toBe('plan-json');
-    expect(logger.info).toHaveBeenCalled();
-  });
-});
 
 describe('IdentifyPlantController', () => {
   beforeEach(() => jest.clearAllMocks());

@@ -1,4 +1,5 @@
 import PlantImageAnalizeOpenAi from '../../../../../../src/modules/plan/infrastructure/services/PlantImageAnalizeOpenAi';
+import Environment from '../../../../../../src/core/utils/Environment';
 
 const logger = {
   info: jest.fn(),
@@ -9,8 +10,15 @@ const logger = {
 };
 
 describe('PlantImageAnalizeOpenAi', () => {
+  const originalOpenAiApiKey = Environment.OPENAI_API_KEY;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Environment.OPENAI_API_KEY = 'test-api-key';
+  });
+
+  afterAll(() => {
+    Environment.OPENAI_API_KEY = originalOpenAiApiKey;
   });
 
   it('given valid image when identifying plants then delegates to analyzeImage and returns response', async () => {

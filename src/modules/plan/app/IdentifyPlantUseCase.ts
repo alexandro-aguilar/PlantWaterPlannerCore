@@ -21,8 +21,9 @@ export default class IdentifyPlanUseCase {
         const secret = await this.secretsManagerService.getSecretValueByArn(Environment.OPENAI_SECRET_ARN);
         Environment.OPENAI_API_KEY = JSON.parse(secret).value;
       }
+      this.logger.info('Starting plant identification process', { plantUrl });
       const imageBase64 = await this.s3Service.downloadFileAsBase64(plantUrl);
-
+      this.logger.info('Starting plant identification with OpenAI');
       const identificationResult = await this.plantImageAnalizeOpenAi.identifyPlants(imageBase64);
       const parsedResult = JSON.parse(identificationResult);
       this.logger.info('Plant identification completed', { parsedResult });

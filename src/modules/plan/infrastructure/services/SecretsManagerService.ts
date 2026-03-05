@@ -13,7 +13,7 @@ export default class SecretsManagerService {
   async getSecretValueByArn(arn: string): Promise<string> {
     const command = new GetSecretValueCommand({ SecretId: arn });
     const response = await this.secretsManagerClient.send(command);
-    this.logger.info('Secret value retrieved successfully', { response });
+    this.logger.info('Secret value retrieved successfully');
     if (!response.SecretString) {
       throw new Error('SecretString missing');
     }

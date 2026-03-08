@@ -22,7 +22,7 @@ export default class S3Service {
    */
   async downloadFile(key: string): Promise<Buffer> {
     try {
-      console.debug(`Attempting to download file from S3 - Bucket: ${Environment.S3_BUCKET_NAME}, Key: ${key}`);
+      this.logger.debug(`Attempting to download file from S3 - Bucket: ${Environment.S3_BUCKET_NAME}, Key: ${key}`);
       const params: GetObjectCommandInput = {
         Bucket: Environment.S3_BUCKET_NAME,
         Key: key,

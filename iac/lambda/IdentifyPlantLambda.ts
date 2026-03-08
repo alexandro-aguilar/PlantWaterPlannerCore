@@ -1,13 +1,13 @@
-import { Construct } from 'constructs';
-import BaseLambdaFunction from '../core/BaseLambdaFunction';
+import { Aws, Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { resolve } from 'path';
-import { Duration } from 'aws-cdk-lib';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpMethod, HttpRoute, HttpRouteKey } from 'aws-cdk-lib/aws-apigatewayv2';
-import GeneratePlanLambdaProps from './GeneratePlanLambdaProps';
-import Environment from '../core/Environment';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Construct } from 'constructs';
+import { resolve } from 'path';
+import BaseLambdaFunction from '../core/BaseLambdaFunction';
+import Environment from '../core/Environment';
+import GeneratePlanLambdaProps from './GeneratePlanLambdaProps';
 
 export default class IdentifyPlantLambda extends BaseLambdaFunction {
   constructor(scope: Construct, id: string, props: GeneratePlanLambdaProps) {
@@ -25,6 +25,9 @@ export default class IdentifyPlantLambda extends BaseLambdaFunction {
         S3_BUCKET_NAME: props.bucket?.bucketName as string,
         OPENAI_SECRET_ARN: Environment.current.OPENAI_SECRET_ARN,
         STAGE: Environment.current.STAGE,
+        BEDROCK_REGION: Environment.current.BEDROCK_REGION,
+        BEDROCK_MODEL_ID: Environment.current.BEDROCK_MODEL_ID,
+        BEDROCK_RUNTIME_ENDPOINT: Environment.current.BEDROCK_RUNTIME_ENDPOINT,
         // LocalStack-specific environment variables
         ...(Environment.current.STAGE === 'local' && {
           NODE_TLS_REJECT_UNAUTHORIZED: '0',
@@ -42,6 +45,17 @@ export default class IdentifyPlantLambda extends BaseLambdaFunction {
     });
 
     this.role?.attachInlinePolicy(s3AccessPolicy);
+
+    const bedrockAccessPolicy = new Policy(scope, `${id}LambdaBedrockAccessPolicy`, {
+      statements: [
+        new PolicyStatement({
+          actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'],
+          resources: [`arn:aws:bedrock:${Aws.REGION}::foundation-model/${Environment.current.BEDROCK_MODEL_ID}`],
+        }),
+      ],
+    });
+
+    this.role?.attachInlinePolicy(bedrockAccessPolicy);
 
     const integration = new HttpLambdaIntegration(`${id}Integration`, this);
 

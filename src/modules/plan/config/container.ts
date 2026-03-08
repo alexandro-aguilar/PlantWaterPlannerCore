@@ -9,6 +9,7 @@ import IdentifyPlantController from '../interface/controllers/IdentifyPlantContr
 import S3Service from '../infrastructure/services/S3Service';
 import IdentifyPlanUseCase from '../app/IdentifyPlantUseCase';
 import SecretsManagerService from '../infrastructure/services/SecretsManagerService';
+import PlantImageAnalizeBedrock from '../infrastructure/services/PlantImageAnalizeBedrock';
 
 export const container = new Container();
 
@@ -20,3 +21,4 @@ container.bind<SecretsManagerService>(types.SecretsManagerService).to(SecretsMan
 container.bind<IdentifyPlantController>(types.PlantIdentifyPlantController).to(IdentifyPlantController);
 container.bind<IdentifyPlanUseCase>(types.IdentifyPlantUseCase).to(IdentifyPlanUseCase);
 container.bind<PlantImageAnalizeOpenAi>(types.PlantImageAnalizeOpenAi).to(PlantImageAnalizeOpenAi);
+container.bind<PlantImageAnalizeBedrock>(types.PlantImageAnalizeBedrock).to(PlantImageAnalizeBedrock);

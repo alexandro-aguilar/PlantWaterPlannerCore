@@ -4,6 +4,7 @@ export const types = {
   TracerService: Symbol.for('TracerService'),
   PlantIdentifyPlantController: Symbol.for('IdentifyPlantController'),
   PlantImageAnalizeOpenAi: Symbol.for('PlantImageAnalizeOpenAi'),
+  PlantImageAnalizeBedrock: Symbol.for('PlantImageAnalizeBedrock'),
   S3Service: Symbol.for('S3Service'),
   SecretsManagerService: Symbol.for('SecretsManagerService'),
   IdentifyPlantUseCase: Symbol.for('IdentifyPlantUseCase'),

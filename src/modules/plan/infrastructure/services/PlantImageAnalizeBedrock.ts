@@ -60,24 +60,43 @@ export default class PlantImageAnalizeBedrock {
                     source: { bytes: imageBytes },
                   },
                 },
-                { text: prompt },
+                {
+                  text: `${prompt}
+Return the result only by calling the tool. Do not answer with markdown, prose, or any free text.`,
+                },
               ],
             },
           ],
-          outputConfig: {
-            textFormat: {
-              type: 'json_schema',
-              structure: {
-                jsonSchema: {
-                  schema: JSON.stringify(jsonSchema),
+          toolConfig: {
+            tools: [
+              {
+                toolSpec: {
+                  name: 'identify_plant',
+                  description: 'Returns structured plant identification data for the provided image.',
+                  inputSchema: {
+                    json: jsonSchema,
+                  },
+                  strict: true,
                 },
+              },
+            ],
+            toolChoice: {
+              tool: {
+                name: 'identify_plant',
               },
             },
           },
         })
       );
       this.logger.info('Bedrock response received', { response });
-      return response.output?.message?.content?.at(0)?.text ?? '';
+
+      for (const contentBlock of response.output?.message?.content ?? []) {
+        if ('toolUse' in contentBlock && contentBlock.toolUse?.name === 'identify_plant') {
+          return JSON.stringify(contentBlock.toolUse.input ?? {});
+        }
+      }
+
+      throw new Error('Bedrock did not return the identify_plant tool response');
     } catch (error) {
       this.logger.error('Error in analyzeImage:', { error });
       throw error;

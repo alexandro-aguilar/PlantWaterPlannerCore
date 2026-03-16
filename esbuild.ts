@@ -1,5 +1,5 @@
 import { build, context } from 'esbuild';
-import { nodeExternalsPlugin } from 'esbuild-node-externals';
+// import { nodeExternalsPlugin } from 'esbuild-node-externals';
 import alias from 'esbuild-plugin-alias';
 import { resolve } from 'path';
 import fg from 'fast-glob';

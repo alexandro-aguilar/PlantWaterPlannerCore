@@ -9,14 +9,10 @@ export default class PlantImageAnalizeBedrock {
   private bedrockClient: BedrockRuntimeClient;
 
   constructor(@inject(types.Logger) private logger: ILogger) {
-    console.log(Environment.STAGE === 'local', {
-      ak: Environment.BEDROCK_ACCESS_KEY_ID,
-      sk: Environment.BEDROCK_SECRET_ACCESS_KEY,
-      token: Environment.BEDROCK_SESSION_TOKEN,
-    });
     this.bedrockClient =
       Environment.STAGE === 'local'
         ? new BedrockRuntimeClient({
+            region: Environment.BEDROCK_REGION,
             endpoint: Environment.BEDROCK_RUNTIME_ENDPOINT,
             credentials: {
               accessKeyId: Environment.BEDROCK_ACCESS_KEY_ID as string,
@@ -24,7 +20,9 @@ export default class PlantImageAnalizeBedrock {
               sessionToken: Environment.BEDROCK_SESSION_TOKEN,
             },
           })
-        : new BedrockRuntimeClient();
+        : new BedrockRuntimeClient({
+            region: Environment.BEDROCK_REGION,
+          });
   }
 
   private async analyzeImage(imageBytes: Buffer, prompt: string): Promise<string> {

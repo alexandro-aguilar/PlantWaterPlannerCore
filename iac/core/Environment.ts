@@ -15,6 +15,7 @@ export default class Environment {
     this.STAGE = (process.env.STAGE || 'local').toLowerCase();
     this.PROJECT_NAME = process.env.PROJECT_NAME || 'PlantWaterPlanner';
     this.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'plant-water-planner-bucket';
+    this.BEDROCK_REGION = process.env.BEDROCK_REGION || process.env.CDK_DEFAULT_REGION || 'us-east-1';
     this.BEDROCK_MODEL_ID = process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-haiku-4-5-20251001-v1:0';
     this.BEDROCK_RUNTIME_ENDPOINT = process.env.BEDROCK_RUNTIME_ENDPOINT;
     this.BEDROCK_ACCESS_KEY_ID = process.env.BEDROCK_ACCESS_KEY_ID;

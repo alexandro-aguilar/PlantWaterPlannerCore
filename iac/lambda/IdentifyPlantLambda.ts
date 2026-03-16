@@ -1,4 +1,4 @@
-import { Aws, Duration } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpMethod, HttpRoute, HttpRouteKey } from 'aws-cdk-lib/aws-apigatewayv2';
@@ -10,6 +10,18 @@ import Environment from '../core/Environment';
 import GeneratePlanLambdaProps from './GeneratePlanLambdaProps';
 
 export default class IdentifyPlantLambda extends BaseLambdaFunction {
+  private static getBedrockInvokeResources(modelId: string): string[] {
+    if (modelId.startsWith('arn:')) {
+      return [modelId];
+    }
+
+    return [
+      'arn:aws:bedrock:*::foundation-model/*',
+      'arn:aws:bedrock:*:*:inference-profile/*',
+      'arn:aws:bedrock:*:*:application-inference-profile/*',
+    ];
+  }
+
   constructor(scope: Construct, id: string, props: GeneratePlanLambdaProps) {
     super(scope, id, {
       functionName: `${id}`,
@@ -52,7 +64,7 @@ export default class IdentifyPlantLambda extends BaseLambdaFunction {
       statements: [
         new PolicyStatement({
           actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'],
-          resources: [`arn:aws:bedrock:${Aws.REGION}::foundation-model/${Environment.current.BEDROCK_MODEL_ID}`],
+          resources: IdentifyPlantLambda.getBedrockInvokeResources(Environment.current.BEDROCK_MODEL_ID),
         }),
       ],
     });

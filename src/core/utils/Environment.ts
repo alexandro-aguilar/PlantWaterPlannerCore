@@ -3,6 +3,7 @@ export default class Environment {
   static readonly POWERTOOLS_SERVICE_NAME = process.env.POWERTOOLS_SERVICE_NAME || 'plant-water-planner-core';
   static readonly POWERTOOLS_LOG_LEVEL = process.env.POWERTOOLS_LOG_LEVEL || 'INFO';
   static readonly PROJECT_NAME = process.env.PROJECT_NAME || 'PlantWaterPlanner';
+  static readonly BEDROCK_REGION = process.env.BEDROCK_REGION || process.env.AWS_REGION || 'us-east-1';
   static readonly BEDROCK_MODEL_ID = process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-haiku-4-5-20251001-v1:0';
   static readonly BEDROCK_RUNTIME_ENDPOINT = process.env.BEDROCK_RUNTIME_ENDPOINT;
   static readonly BEDROCK_ACCESS_KEY_ID = process.env.BEDROCK_ACCESS_KEY_ID;

@@ -7,7 +7,6 @@ import Environment from './core/Environment';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import PlantWaterPlannerBucket from './s3/PlantWaterPlannerBucket';
 import GenerateS3PresignedUrlLambda from './lambda/GenerateS3PresignedUrlLambda';
-import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 
 export class PlantWaterPlannerCoreStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -18,8 +17,6 @@ export class PlantWaterPlannerCoreStack extends cdk.Stack {
         bucketName: 'hot-reload',
       });
     }
-
-    const openAiSecret = Secret.fromSecretCompleteArn(this, 'OpenAISecret', Environment.current.OPENAI_SECRET_ARN);
 
     const bucket = new PlantWaterPlannerBucket(
       this,
@@ -34,7 +31,7 @@ export class PlantWaterPlannerCoreStack extends cdk.Stack {
       managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')],
     });
 
-    const identifyPlantLambda = new IdentifyPlantLambda(this, `IdentifyPlantLambda-${Environment.current.STAGE}`, {
+    new IdentifyPlantLambda(this, `IdentifyPlantLambda-${Environment.current.STAGE}`, {
       role,
       api,
       bucket,
@@ -45,8 +42,6 @@ export class PlantWaterPlannerCoreStack extends cdk.Stack {
       bucket,
       api,
     });
-
-    openAiSecret.grantRead(identifyPlantLambda);
 
     new cdk.CfnOutput(this, `ApiGatewayUrl-${Environment.current.STAGE}`, {
       value: api.apiEndpoint ?? 'unknown-endpoint',

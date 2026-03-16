@@ -1,7 +1,6 @@
 import { inject, injectable } from 'inversify';
 import ILogger from '../../../core/utils/ILogger';
 import { types } from '../config/types';
-import PlantImageAnalizeOpenAi from '../infrastructure/services/PlantImageAnalizeOpenAi';
 import S3Service from '../infrastructure/services/S3Service';
 import PlantImageAnalizeBedrock from '../infrastructure/services/PlantImageAnalizeBedrock';
 
@@ -9,7 +8,6 @@ import PlantImageAnalizeBedrock from '../infrastructure/services/PlantImageAnali
 export default class IdentifyPlanUseCase {
   constructor(
     @inject(types.Logger) private logger: ILogger,
-    @inject(types.PlantImageAnalizeOpenAi) private plantImageAnalizeOpenAi: PlantImageAnalizeOpenAi,
     @inject(types.S3Service) private s3Service: S3Service,
     @inject(types.PlantImageAnalizeBedrock) private plantImageAnalizeBedrock: PlantImageAnalizeBedrock
   ) {}

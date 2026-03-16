@@ -28,12 +28,7 @@ describe('IdentifyPlantUseCase', () => {
     const aiResult = JSON.stringify({ plant: { name: 'Fern' } });
     s3Service.downloadFile.mockResolvedValue(imageBuffer);
     plantImageAnalizeBedrock.identifyPlants.mockResolvedValue(aiResult);
-    const useCase = new IdentifyPlantUseCase(
-      logger as any,
-      {} as any,
-      s3Service as any,
-      plantImageAnalizeBedrock as any
-    );
+    const useCase = new IdentifyPlantUseCase(logger as any, s3Service as any, plantImageAnalizeBedrock as any);
 
     // When
     const result = await useCase.execute(key);
@@ -57,12 +52,7 @@ describe('IdentifyPlantUseCase', () => {
     const error = new Error('bedrock failed');
     s3Service.downloadFile.mockResolvedValue(imageBuffer);
     plantImageAnalizeBedrock.identifyPlants.mockRejectedValue(error);
-    const useCase = new IdentifyPlantUseCase(
-      logger as any,
-      {} as any,
-      s3Service as any,
-      plantImageAnalizeBedrock as any
-    );
+    const useCase = new IdentifyPlantUseCase(logger as any, s3Service as any, plantImageAnalizeBedrock as any);
 
     // When
     // Then
@@ -76,12 +66,7 @@ describe('IdentifyPlantUseCase', () => {
     // Given
     const err = new Error('boom');
     s3Service.downloadFile.mockRejectedValue(err);
-    const useCase = new IdentifyPlantUseCase(
-      logger as any,
-      {} as any,
-      s3Service as any,
-      plantImageAnalizeBedrock as any
-    );
+    const useCase = new IdentifyPlantUseCase(logger as any, s3Service as any, plantImageAnalizeBedrock as any);
 
     // When / Then
     await expect(useCase.execute('x')).rejects.toThrow('boom');

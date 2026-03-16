@@ -45,7 +45,6 @@ jobs:
       name: dev
     env:
       STAGE: dev
-      OPENAI_SECRET_ARN: ${{ secrets.OPENAI_SECRET_ARN }}
 
     steps:
       - name: Checkout repository

@@ -20,7 +20,7 @@ async function main() {
     entryPoints,
     bundle: true,
     platform: 'node' as const,
-    target: 'node22',
+    target: 'node24',
     outbase: 'src',
     outdir: '.dist/src',
     sourcemap: isWatchMode,
@@ -39,7 +39,7 @@ async function main() {
       const ctx = await context(buildOptions);
       await ctx.watch();
     } else {
-      await build({ ...buildOptions, external: ['@aws-sdk'], minify: true });
+      await build({ ...buildOptions, external: ['@aws-sdk'], minify: false });
       console.log('✅ TypeScript build successful');
     }
   } catch (error) {

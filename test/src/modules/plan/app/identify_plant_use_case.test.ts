@@ -1,5 +1,4 @@
 import IdentifyPlantUseCase from '../../../../../src/modules/plan/app/IdentifyPlantUseCase';
-import Environment from '../../../../../src/core/utils/Environment';
 
 const logger = {
   info: jest.fn(),
@@ -9,97 +8,84 @@ const logger = {
   addContext: jest.fn(),
 };
 
-const plantImageAnalizeOpenAi = {
+const plantImageAnalizeBedrock = {
   identifyPlants: jest.fn(),
 };
 
 const s3Service = {
-  downloadFileAsBase64: jest.fn(),
-};
-
-const secretsManagerService = {
-  getSecretValueByArn: jest.fn(),
+  downloadFile: jest.fn(),
 };
 
 describe('IdentifyPlantUseCase', () => {
-  const originalOpenAiApiKey = Environment.OPENAI_API_KEY;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    Environment.OPENAI_API_KEY = 'existing-api-key';
-  });
-
-  afterAll(() => {
-    Environment.OPENAI_API_KEY = originalOpenAiApiKey;
   });
 
   it('given valid s3 key when executing then returns parsed identification result', async () => {
     // Given
     const key = 'images/plant.jpg';
-    const encoded = 'BASE64';
+    const imageBuffer = Buffer.from('plant-image');
     const aiResult = JSON.stringify({ plant: { name: 'Fern' } });
-    s3Service.downloadFileAsBase64.mockResolvedValue(encoded);
-    plantImageAnalizeOpenAi.identifyPlants.mockResolvedValue(aiResult);
+    s3Service.downloadFile.mockResolvedValue(imageBuffer);
+    plantImageAnalizeBedrock.identifyPlants.mockResolvedValue(aiResult);
     const useCase = new IdentifyPlantUseCase(
       logger as any,
-      plantImageAnalizeOpenAi as any,
+      {} as any,
       s3Service as any,
-      secretsManagerService as any
+      plantImageAnalizeBedrock as any
     );
 
     // When
     const result = await useCase.execute(key);
 
     // Then
-    expect(secretsManagerService.getSecretValueByArn).not.toHaveBeenCalled();
-    expect(s3Service.downloadFileAsBase64).toHaveBeenCalledWith(key);
-    expect(plantImageAnalizeOpenAi.identifyPlants).toHaveBeenCalledWith(encoded);
+    expect(s3Service.downloadFile).toHaveBeenCalledWith(key);
+    expect(plantImageAnalizeBedrock.identifyPlants).toHaveBeenCalledWith(imageBuffer);
     expect(result).toEqual({ plant: { name: 'Fern' } });
+    expect(logger.info).toHaveBeenCalledWith('Raw Bedrock response', {
+      identificationResult: aiResult,
+    });
     expect(logger.info).toHaveBeenCalledWith('Plant identification completed', {
       parsedResult: { plant: { name: 'Fern' } },
     });
   });
 
-  it('given missing openai api key when executing then loads it from secrets manager before identifying plant', async () => {
+  it('given bedrock service fails when executing then logs error and rethrows', async () => {
     // Given
     const key = 'images/plant.jpg';
-    const encoded = 'BASE64';
-    const aiResult = JSON.stringify({ plant: { name: 'Monstera' } });
-    Environment.OPENAI_API_KEY = undefined;
-    secretsManagerService.getSecretValueByArn.mockResolvedValue(JSON.stringify({ value: 'secret-api-key' }));
-    s3Service.downloadFileAsBase64.mockResolvedValue(encoded);
-    plantImageAnalizeOpenAi.identifyPlants.mockResolvedValue(aiResult);
+    const imageBuffer = Buffer.from('plant-image');
+    const error = new Error('bedrock failed');
+    s3Service.downloadFile.mockResolvedValue(imageBuffer);
+    plantImageAnalizeBedrock.identifyPlants.mockRejectedValue(error);
     const useCase = new IdentifyPlantUseCase(
       logger as any,
-      plantImageAnalizeOpenAi as any,
+      {} as any,
       s3Service as any,
-      secretsManagerService as any
+      plantImageAnalizeBedrock as any
     );
 
     // When
-    const result = await useCase.execute(key);
-
     // Then
-    expect(secretsManagerService.getSecretValueByArn).toHaveBeenCalledWith(Environment.OPENAI_SECRET_ARN);
-    expect(Environment.OPENAI_API_KEY).toBe('secret-api-key');
-    expect(s3Service.downloadFileAsBase64).toHaveBeenCalledWith(key);
-    expect(plantImageAnalizeOpenAi.identifyPlants).toHaveBeenCalledWith(encoded);
-    expect(result).toEqual({ plant: { name: 'Monstera' } });
+    await expect(useCase.execute(key)).rejects.toThrow('bedrock failed');
+    expect(s3Service.downloadFile).toHaveBeenCalledWith(key);
+    expect(plantImageAnalizeBedrock.identifyPlants).toHaveBeenCalledWith(imageBuffer);
+    expect(logger.error).toHaveBeenCalledWith('Error in IdentifyPlanUseCase execute:', { error });
   });
 
-  it('given downstream failure when executing then logs error and rethrows', async () => {
+  it('given s3 download fails when executing then logs error and rethrows', async () => {
     // Given
     const err = new Error('boom');
-    s3Service.downloadFileAsBase64.mockRejectedValue(err);
+    s3Service.downloadFile.mockRejectedValue(err);
     const useCase = new IdentifyPlantUseCase(
       logger as any,
-      plantImageAnalizeOpenAi as any,
+      {} as any,
       s3Service as any,
-      secretsManagerService as any
+      plantImageAnalizeBedrock as any
     );
 
     // When / Then
     await expect(useCase.execute('x')).rejects.toThrow('boom');
-    expect(logger.error).toHaveBeenCalled();
+    expect(plantImageAnalizeBedrock.identifyPlants).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith('Error in IdentifyPlanUseCase execute:', { error: err });
   });
 });

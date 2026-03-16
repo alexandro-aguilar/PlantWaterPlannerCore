@@ -9,9 +9,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const logger: ILogger = container.get(types.Logger);
 
-const s3 = new S3Client({
-  region: Environment.AWS_REGION,
-});
+const s3 = new S3Client();
 
 const response = (status: number, body: unknown) => ({
   statusCode: status,

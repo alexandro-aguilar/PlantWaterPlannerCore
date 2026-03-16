@@ -23,14 +23,16 @@ export default class IdentifyPlantLambda extends BaseLambdaFunction {
         TMP_KEY_PREFIX: 'guest/', //move it to environment file
         POWERTOOLS_SERVICE_NAME: `${id}`,
         S3_BUCKET_NAME: props.bucket?.bucketName as string,
-        OPENAI_SECRET_ARN: Environment.current.OPENAI_SECRET_ARN,
         STAGE: Environment.current.STAGE,
         BEDROCK_REGION: Environment.current.BEDROCK_REGION,
         BEDROCK_MODEL_ID: Environment.current.BEDROCK_MODEL_ID,
-        BEDROCK_RUNTIME_ENDPOINT: Environment.current.BEDROCK_RUNTIME_ENDPOINT,
         // LocalStack-specific environment variables
         ...(Environment.current.STAGE === 'local' && {
           NODE_TLS_REJECT_UNAUTHORIZED: '0',
+          BEDROCK_RUNTIME_ENDPOINT: Environment.current.BEDROCK_RUNTIME_ENDPOINT,
+          BEDROCK_ACCESS_KEY_ID: Environment.current.BEDROCK_ACCESS_KEY_ID, // Just for local development, in production these should be provided by the execution role
+          BEDROCK_SECRET_ACCESS_KEY: Environment.current.BEDROCK_SECRET_ACCESS_KEY, // Just for local development, in production these should be provided by the execution role
+          BEDROCK_SESSION_TOKEN: Environment.current.BEDROCK_SESSION_TOKEN, // Just for local development, in production these should be provided by the execution role
         }),
       },
     });

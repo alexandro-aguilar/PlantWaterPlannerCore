@@ -23,7 +23,6 @@ export default class IdentifyPlanUseCase {
 
       const parsedResult = JSON.parse(identificationResult);
       this.logger.info('Plant identification completed', { parsedResult });
-
       return parsedResult;
     } catch (error) {
       this.logger.error('Error in IdentifyPlanUseCase execute:', { error });

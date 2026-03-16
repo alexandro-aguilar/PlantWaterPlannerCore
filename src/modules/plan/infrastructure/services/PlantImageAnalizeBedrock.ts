@@ -8,10 +8,44 @@ import { types } from '../../config/types';
 export default class PlantImageAnalizeBedrock {
   private bedrockClient: BedrockRuntimeClient;
 
-  constructor(@inject(types.Logger) private logger: ILogger) {}
+  constructor(@inject(types.Logger) private logger: ILogger) {
+    console.log(Environment.STAGE === 'local', {
+      ak: Environment.BEDROCK_ACCESS_KEY_ID,
+      sk: Environment.BEDROCK_SECRET_ACCESS_KEY,
+      token: Environment.BEDROCK_SESSION_TOKEN,
+    });
+    this.bedrockClient = new BedrockRuntimeClient({
+      endpoint: Environment.BEDROCK_RUNTIME_ENDPOINT,
+      credentials: {
+        accessKeyId: Environment.BEDROCK_ACCESS_KEY_ID as string,
+        secretAccessKey: Environment.BEDROCK_SECRET_ACCESS_KEY as string,
+        sessionToken: Environment.BEDROCK_SESSION_TOKEN,
+      },
+    });
+  }
 
   private async analyzeImage(imageBytes: Buffer, prompt: string): Promise<string> {
     try {
+      const jsonSchema = {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Common name of the plant' },
+          scientific_name: { type: 'string', description: 'Scientific name of the plant' },
+          sunlight_preference: { type: 'string', description: 'Sunlight preference of the plant' },
+          watering_frequency_days: { type: 'number', description: 'Watering frequency in days' },
+          current_condition: { type: 'string', description: 'Current condition of the plant' },
+          care_notes: { type: 'string', description: 'Care notes for the plant' },
+        },
+        required: [
+          'name',
+          'scientific_name',
+          'sunlight_preference',
+          'watering_frequency_days',
+          'current_condition',
+          'care_notes',
+        ],
+        additionalProperties: false,
+      };
       const response = await this.bedrockClient.send(
         new ConverseCommand({
           modelId: Environment.BEDROCK_MODEL_ID,
@@ -29,6 +63,16 @@ export default class PlantImageAnalizeBedrock {
               ],
             },
           ],
+          outputConfig: {
+            textFormat: {
+              type: 'json_schema',
+              structure: {
+                jsonSchema: {
+                  schema: JSON.stringify(jsonSchema),
+                },
+              },
+            },
+          },
         })
       );
       this.logger.info('Bedrock response received', { response });
@@ -40,16 +84,7 @@ export default class PlantImageAnalizeBedrock {
   }
 
   async identifyPlants(imageBytes: Buffer): Promise<string> {
-    this.logger.info('hola');
     try {
-      this.logger.info('Initializing BedrockRuntimeClient', {
-        region: Environment.BEDROCK_REGION,
-        endpoint: Environment.BEDROCK_RUNTIME_ENDPOINT,
-      });
-      this.bedrockClient = new BedrockRuntimeClient({
-        region: Environment.BEDROCK_REGION,
-        endpoint: Environment.BEDROCK_RUNTIME_ENDPOINT,
-      });
       this.logger.info('Starting plant identification with Bedrock', { imageSize: imageBytes.length });
       const prompt = `Analyze this image and identify just a plant. 
     Respond strictly in **English**.
@@ -69,7 +104,7 @@ export default class PlantImageAnalizeBedrock {
         "sunlight_preference": "string",
         "watering_frequency_days": number,
         "current_condition": "string",
-      "care_notes": "string"
+        "care_notes": "string"
       }
     }`;
       const response = await this.analyzeImage(imageBytes, prompt);

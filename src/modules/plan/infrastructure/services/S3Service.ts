@@ -9,9 +9,7 @@ export default class S3Service {
   private s3Client: S3Client;
 
   constructor(@inject(types.Logger) private logger: ILogger) {
-    this.s3Client = new S3Client({
-      region: Environment.AWS_REGION,
-    });
+    this.s3Client = new S3Client();
   }
 
   /**

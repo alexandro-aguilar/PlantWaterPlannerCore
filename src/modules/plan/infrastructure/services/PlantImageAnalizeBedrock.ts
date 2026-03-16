@@ -99,14 +99,12 @@ export default class PlantImageAnalizeBedrock {
     
     Return the response in JSON format with the following structure:
     {
-      "plant": {
-        "name": "string",
-        "scientific_name": "string",
-        "sunlight_preference": "string",
-        "watering_frequency_days": number,
-        "current_condition": "string",
-        "care_notes": "string"
-      }
+      "name": "string",
+      "scientific_name": "string",
+      "sunlight_preference": "string",
+      "watering_frequency_days": number,
+      "current_condition": "string",
+      "care_notes": "string"
     }`;
       const response = await this.analyzeImage(imageBytes, prompt);
       return response;

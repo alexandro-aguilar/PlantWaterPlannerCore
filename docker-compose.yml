@@ -10,12 +10,12 @@ services:
       - HOST_LAMBDA_DIR=${PWD}
       - DOCKER_HOST=unix:///var/run/docker.sock
       - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      - DISABLE_TRANSPARENT_ENDPOINT_INJECTION=1 # to prevent localstack from injecting endpoints into the bedrock client
     networks:
       - localnet
     volumes:
       - '${LOCALSTACK_VOLUME_DIR:-./volume/localstack}:/var/lib/localstack'
       - '/var/run/docker.sock:/var/run/docker.sock'
-
 networks:
   localnet:
     name: localnet

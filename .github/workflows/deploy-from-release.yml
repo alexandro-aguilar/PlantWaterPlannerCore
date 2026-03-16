@@ -1,0 +1,104 @@
+name: deploy-from-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to deploy (example: v1.2.3)'
+        required: true
+        type: string
+      target_environment:
+        description: 'GitHub Environment that holds deploy secrets/vars'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      stage:
+        description: 'Runtime STAGE env var value'
+        required: true
+        default: dev
+        type: string
+      artifact_name:
+        description: 'Optional override for release asset filename'
+        required: false
+        default: ''
+        type: string
+      stack_name:
+        description: 'CDK stack name'
+        required: true
+        default: PlantWaterPlannerCoreStack
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  NODE_VERSION: 24
+  YARN_VERSION: 4.12.0
+  ARTIFACT_BASENAME: plant-water-planner-core
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.target_environment }}
+    steps:
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          gh release download "${{ inputs.release_tag }}" --dir release
+
+      - name: Resolve artifact filename
+        id: artifact
+        run: |
+          if [ -n "${{ inputs.artifact_name }}" ]; then
+            ASSET="${{ inputs.artifact_name }}"
+          else
+            ASSET="${{ env.ARTIFACT_BASENAME }}-${{ inputs.release_tag }}.tar.gz"
+          fi
+          echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+
+      - name: Verify artifact checksum
+        working-directory: release
+        run: sha256sum --check checksums.txt --ignore-missing
+
+      - name: Extract artifact
+        run: |
+          mkdir -p workspace
+          tar -xzf release/${{ steps.artifact.outputs.asset }} -C workspace
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate Yarn
+        run: corepack prepare yarn@${{ env.YARN_VERSION }} --activate
+
+      - name: Install dependencies from release lockfile
+        working-directory: workspace
+        run: yarn install --immutable
+
+      - name: Install AWS CDK CLI
+        run: npm i -g aws-cdk
+
+      - name: Deploy stack from release artifact
+        working-directory: workspace
+        env:
+          STAGE: ${{ inputs.stage }}
+          OPENAI_SECRET_ARN: ${{ secrets.OPENAI_SECRET_ARN }}
+        run: cdk deploy ${{ inputs.stack_name }} --require-approval never

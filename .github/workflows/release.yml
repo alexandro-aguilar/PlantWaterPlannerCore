@@ -1,0 +1,79 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: 24
+  YARN_VERSION: 4.12.0
+  ARTIFACT_BASENAME: plant-water-planner-core
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate Yarn
+        run: corepack prepare yarn@${{ env.YARN_VERSION }} --activate
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run unit tests
+        run: yarn test --ci
+
+      - name: Build lambda artifacts
+        run: yarn build
+
+      - name: Prepare release bundle
+        run: |
+          mkdir -p release
+          tar -czf release/${ARTIFACT_BASENAME}-${GITHUB_REF_NAME}.tar.gz \
+            .dist \
+            iac \
+            src \
+            cdk.json \
+            esbuild.ts \
+            package.json \
+            tsconfig.json \
+            yarn.lock \
+            .yarnrc.yml \
+            .yarn
+
+      - name: Generate checksums
+        run: sha256sum release/*.tar.gz > release/checksums.txt
+
+      - name: Generate release manifest
+        run: |
+          cat <<EOF > release/manifest.json
+          {
+            "tag": "${GITHUB_REF_NAME}",
+            "commit": "${GITHUB_SHA}",
+            "artifact": "${ARTIFACT_BASENAME}-${GITHUB_REF_NAME}.tar.gz",
+            "created_at_utc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Publish GitHub Release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            release/*.tar.gz
+            release/checksums.txt
+            release/manifest.json

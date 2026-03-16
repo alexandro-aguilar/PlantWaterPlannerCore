@@ -9,7 +9,7 @@ const logger: ILogger = container.get(types.Logger);
 
 export const handler = async (event: APIGatewayProxyEventV2, context: Context): Promise<APIGatewayProxyResultV2> => {
   logger.addContext({ requestId: context.awsRequestId });
-  logger.info('env:', { env: process.env });
+
   const identifyPlantController = container.get<IdentifyPlantController>(types.PlantIdentifyPlantController);
   const response = await identifyPlantController.execute(event);
   return response;

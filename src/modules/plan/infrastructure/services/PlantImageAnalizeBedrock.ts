@@ -14,14 +14,17 @@ export default class PlantImageAnalizeBedrock {
       sk: Environment.BEDROCK_SECRET_ACCESS_KEY,
       token: Environment.BEDROCK_SESSION_TOKEN,
     });
-    this.bedrockClient = new BedrockRuntimeClient({
-      endpoint: Environment.BEDROCK_RUNTIME_ENDPOINT,
-      credentials: {
-        accessKeyId: Environment.BEDROCK_ACCESS_KEY_ID as string,
-        secretAccessKey: Environment.BEDROCK_SECRET_ACCESS_KEY as string,
-        sessionToken: Environment.BEDROCK_SESSION_TOKEN,
-      },
-    });
+    this.bedrockClient =
+      Environment.STAGE === 'local'
+        ? new BedrockRuntimeClient({
+            endpoint: Environment.BEDROCK_RUNTIME_ENDPOINT,
+            credentials: {
+              accessKeyId: Environment.BEDROCK_ACCESS_KEY_ID as string,
+              secretAccessKey: Environment.BEDROCK_SECRET_ACCESS_KEY as string,
+              sessionToken: Environment.BEDROCK_SESSION_TOKEN,
+            },
+          })
+        : new BedrockRuntimeClient();
   }
 
   private async analyzeImage(imageBytes: Buffer, prompt: string): Promise<string> {

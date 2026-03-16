@@ -95,17 +95,7 @@ export default class PlantImageAnalizeBedrock {
     - Sunlight preference (e.g., full sun, partial sun, shade)
     - Watering recommendations (frequency in days)
     - Apparent condition of the plant (healthy, needs water, etc.)
-    - Short care notes (tips to keep it healthy)
-    
-    Return the response in JSON format with the following structure:
-    {
-      "name": "string",
-      "scientific_name": "string",
-      "sunlight_preference": "string",
-      "watering_frequency_days": number,
-      "current_condition": "string",
-      "care_notes": "string"
-    }`;
+    - Short care notes (tips to keep it healthy)`;
       const response = await this.analyzeImage(imageBytes, prompt);
       return response;
     } catch (error) {

@@ -10,10 +10,9 @@
     "build:local": "ts-node esbuild.ts --watch",
     "test": "jest",
     "cdk": "cdk",
-    "secret:create:openai": "tsx scripts/create-openai-secret.ts",
     "prepare": "husky",
     "localstack": "docker ps -aq --filter name=localstack_plant-water-planner-core | xargs docker stop && docker ps -aq --filter name=localstack_plant-water-planner-core | xargs docker rm && docker-compose up",
-    "deploy:local": "rm -rf cdk.out/ && yarn bootstrap:local && yarn secret:create:openai && yarn cdklocal deploy --verbose --require-approval never",
+    "deploy:local": "rm -rf cdk.out/ && yarn bootstrap:local && yarn cdklocal deploy --verbose --require-approval never",
     "bootstrap:local": "cdklocal bootstrap --verbose"
   },
   "devDependencies": {

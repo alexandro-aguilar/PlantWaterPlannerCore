@@ -56,7 +56,9 @@ jobs:
             .yarn
 
       - name: Generate checksums
-        run: sha256sum release/*.tar.gz > release/checksums.txt
+        run: |
+          cd release
+          sha256sum *.tar.gz > checksums.txt
 
       - name: Generate release manifest
         run: |

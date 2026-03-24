@@ -73,8 +73,7 @@ jobs:
           echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
 
       - name: Verify artifact checksum
-        working-directory: release
-        run: sha256sum --check checksums.txt --ignore-missing
+        run: sha256sum --check release/checksums.txt --ignore-missing
 
       - name: Extract artifact
         run: |

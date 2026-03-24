@@ -5,11 +5,11 @@ import * as dotenv from 'dotenv';
 import Environment from './core/Environment';
 
 dotenv.config();
+Environment.getInstance(); // Initialize environment variables
 
 const app = new cdk.App();
-cdk.Tags.of(app).add('projectName', 'PlantWaterPlannerCore');
-Environment.getInstance(); // Initialize environment variables
-new PlantWaterPlannerCoreStack(app, 'PlantWaterPlannerCoreStack', {
+cdk.Tags.of(app).add('projectName', `PlantWaterPlannerCore-${Environment.getInstance().STAGE}`);
+new PlantWaterPlannerCoreStack(app, `PlantWaterPlannerCoreStack${Environment.getInstance().STAGE}`, {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

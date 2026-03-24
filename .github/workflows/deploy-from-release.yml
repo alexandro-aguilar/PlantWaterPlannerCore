@@ -55,6 +55,14 @@ jobs:
             exit 1
           fi
 
+          ASSET_COUNT="$(gh release view "${{ inputs.release_tag }}" --repo "${{ github.repository }}" --json assets --jq '.assets | length')"
+          if [ "$ASSET_COUNT" -eq 0 ]; then
+            echo "Release tag '${{ inputs.release_tag }}' exists, but it has no uploaded assets."
+            echo "Available release metadata:"
+            gh release view "${{ inputs.release_tag }}" --repo "${{ github.repository }}" --json url,name,tagName
+            exit 1
+          fi
+
       - name: Download release assets
         env:
           GH_TOKEN: ${{ github.token }}

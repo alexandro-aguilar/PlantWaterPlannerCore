@@ -26,7 +26,7 @@ on:
       stack_name:
         description: 'CDK stack name'
         required: true
-        default: PlantWaterPlannerCoreStack
+        default: PlantWaterPlannerCoreStack-prod
         type: string
 
 permissions:
@@ -44,12 +44,23 @@ jobs:
     environment:
       name: ${{ inputs.target_environment }}
     steps:
+      - name: Validate requested release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "${{ inputs.release_tag }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release tag '${{ inputs.release_tag }}' was not found in ${{ github.repository }}."
+            echo "Recent available releases:"
+            gh release list --repo "${{ github.repository }}" --limit 10
+            exit 1
+          fi
+
       - name: Download release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p release
-          gh release download "${{ inputs.release_tag }}" --dir release
+          gh release download "${{ inputs.release_tag }}" --repo "${{ github.repository }}" --dir release
 
       - name: Resolve artifact filename
         id: artifact
